@@ -7,10 +7,10 @@ import React, { useState, useEffect, useRef } from 'react';
  * @param {String} placeholder - Input placeholder text
  * @param {Function} onSelect - Callback when an item is selected
  */
-const SearchAutocomplete = ({ 
-  data = [], 
-  placeholder = "Search...", 
-  onSelect 
+const SearchAutocomplete = ({
+  data = [],
+  placeholder = "Search...",
+  onSelect
 }) => {
   const [query, setQuery] = useState('');
   const [isOpen, setIsOpen] = useState(false);
@@ -18,11 +18,11 @@ const SearchAutocomplete = ({
   const wrapperRef = useRef(null);
 
   // Filter data based on query
-  const filteredData = query === '' 
-    ? [] 
-    : data.filter(item => 
-        item.label.toLowerCase().includes(query.toLowerCase())
-      );
+  const filteredData = query === ''
+    ? []
+    : data.filter(item =>
+      item.label.toLowerCase().includes(query.toLowerCase())
+    );
 
   // Handle outside click to close dropdown
   useEffect(() => {
@@ -65,33 +65,39 @@ const SearchAutocomplete = ({
   const handleInputChange = (e) => {
     setQuery(e.target.value);
     setIsOpen(true);
-    setActiveIndex(-1); // Reset highlight when typing
+    setActiveIndex(-1);
+  };
+
+  // Helper function to escape regex special characters
+  const escapeRegex = (str) => {
+    return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   };
 
   // Helper to render text with the matching query highlighted
   const renderHighlightedText = (text, highlight) => {
     if (!highlight.trim()) return text;
-    
-    // Split on highlight term and include term in splits, ignore case
-    const parts = text.split(new RegExp(`(${highlight})`, 'gi'));
-    
-    return parts.map((part, index) => 
-      part.toLowerCase() === highlight.toLowerCase() 
-        ? <strong key={index} className="ease-search-highlight">{part}</strong> 
+
+    // Escape special characters before using in RegExp
+    const escaped = escapeRegex(highlight);
+    const parts = text.split(new RegExp(`(${escaped})`, 'gi'));
+
+    return parts.map((part, index) =>
+      part.toLowerCase() === highlight.toLowerCase()
+        ? <strong key={index} className="ease-search-highlight">{part}</strong>
         : part
     );
   };
 
   return (
     <div className="ease-search-wrapper" ref={wrapperRef}>
-      
+
       {/* Search Input Container */}
       <div className={`ease-search-input-container ${isOpen && query ? 'is-active' : ''}`}>
         <svg className="ease-search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8"></circle>
           <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
         </svg>
-        <input 
+        <input
           type="text"
           className="ease-search-input"
           placeholder={placeholder}
@@ -103,9 +109,9 @@ const SearchAutocomplete = ({
           aria-autocomplete="list"
           role="combobox"
         />
-        
+
         {/* Clear Button */}
-        <button 
+        <button
           className={`ease-search-clear ${query ? 'is-visible' : ''}`}
           onClick={() => { setQuery(''); setIsOpen(false); }}
           aria-label="Clear search"
@@ -122,17 +128,17 @@ const SearchAutocomplete = ({
         {filteredData.length > 0 ? (
           <ul className="ease-search-list" role="listbox">
             {/* The Floating Highlight Background */}
-            <li 
+            <li
               className="ease-search-floating-highlight"
               style={{
                 opacity: activeIndex >= 0 ? 1 : 0,
-                transform: `translateY(${activeIndex * 44}px)` // Assumes each item is exactly 44px tall
+                transform: `translateY(${activeIndex * 44}px)`
               }}
               aria-hidden="true"
             />
-            
+
             {filteredData.map((item, index) => (
-              <li 
+              <li
                 key={item.id}
                 role="option"
                 aria-selected={activeIndex === index}
@@ -158,3 +164,4 @@ const SearchAutocomplete = ({
 };
 
 export default SearchAutocomplete;
+
